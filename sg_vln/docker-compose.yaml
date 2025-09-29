@@ -3,7 +3,15 @@ services:
         image: curly/sg_vln:latest
         restart: always
         container_name: sg_vln
-        entrypoint: zsh
+        build:
+          context: .
+          args:
+            BASE_IMAGE: nvcr.io/nvidia/isaac-sim
+            IMAGE_TAG: 5.0.0
+            USERNAME: $USER
+        entrypoint: ["/bin/bash", "-i"]
+        tty: true
+        stdin_open: true
         environment:
             - ACCEPT_EULA=Y
             - PRIVACY_CONSENT=Y
@@ -28,33 +36,46 @@ services:
             # - $HOME/Projects/VLN/isaac_sim/isaac_files/data:$HOME/.local/share/ov/data:rw
             # - $HOME/Projects/VLN/isaac_sim/isaac_files/documents:$HOME/Documents:rw
             # VINO
-            - /home/junzhewu/Projects:/root/Projects:rw
-            - /media/sdd1/hm3d_dataset:/data:rw
-            - /media/sdd1/outdoor_env:/outdoor_env:rw
-            - /mnt/workspace/datasets/habitat_datasets:/mnt_habitat_datasets:rw
-            - /media/sdd1/isaac_vlnce_assets:/media/sdd1/isaac_vlnce_assets:rw
+            # - /home/junzhewu/Projects:/root/Projects:rw
+            # - /media/sdd1/hm3d_dataset:/data:rw
+            # - /media/sdd1/outdoor_env:/outdoor_env:rw
+            # - /mnt/workspace/datasets/habitat_datasets:/mnt_habitat_datasets:rw
+            # - /media/sdd1/isaac_vlnce_assets:/media/sdd1/isaac_vlnce_assets:rw
             # GOLDEEN
             # - /home/huyu/junzhe/Projects:/root/Projects:rw
             # - /home/huyu/junzhe/datasets:/data:rw
             # - /mnt/workspace/datasets/habitat_datasets:/mnt/workspace/datasets/habitat_datasets:rw
             # - /mnt/workspace/users/huyu/junzhe/VLN_dump:/root/Projects/VLN/ext_dump/:rw
             # ISAAC Cache
-            - $HOME/isaac/cache_kit:/isaac-sim/kit/cache
-            - $HOME/isaac/cache_ov:/root/.cache/ov
-            - $HOME/isaac/cache_pip:/root/.cache/pip
-            - $HOME/isaac/cache_gl:/root/.cache/nvidia/GLCache
-            - $HOME/isaac/cache_compute:/root/.nv/ComputeCache
-            - $HOME/isaac/logs:/root/.nvidia-omniverse/logs
-            - $HOME/isaac/data:/root/.local/share/ov/data
-            - $HOME/isaac/lab_docs:/dependencies/IsaacLab/docs/_build
-            - $HOME/isaac/lab_logs:/dependencies/IsaacLab/logs
-            - $HOME/isaac/lab_data:/dependencies/IsaacLab/data_storage
+            # - $HOME/docker/isaac-sim/cache_kit:/isaac-sim/kit/cache
+            # - $HOME/docker/isaac-sim/cache_ov:/root/.cache/ov
+            # - $HOME/docker/isaac-sim/cache_pip:/root/.cache/pip
+            # - $HOME/docker/isaac-sim/cache_gl:/root/.cache/nvidia/GLCache
+            # - $HOME/docker/isaac-sim/cache_compute:/root/.nv/ComputeCache
+            # - $HOME/docker/isaac-sim/logs:/root/.nvidia-omniverse/logs
+            # - $HOME/docker/isaac-sim/data:/root/.local/share/ov/data
+            # - $HOME/docker/isaac-sim/lab_docs:/dependencies/IsaacLab/docs/_build
+            # - $HOME/docker/isaac-sim/lab_logs:/dependencies/IsaacLab/logs
+            # - $HOME/docker/isaac-sim/lab_data:/dependencies/IsaacLab/data_storage
+            - $HOME/docker/isaac-sim/cache/ov:/root/.cache/ov:rw 
+            - $HOME/docker/isaac-sim/cache/pip:/root/.cache/pip:rw 
+            - $HOME/docker/isaac-sim/cache/glcache:/root/.cache/nvidia/GLCache:rw 
+            - $HOME/docker/isaac-sim/cache/computecache:/root/.nv/ComputeCache:rw 
+            - $HOME/docker/isaac-sim/cache/asset_browser:/isaac-sim/exts/isaacsim.asset.browser/cache:rw 
+            - $HOME/docker/isaac-sim/logs:/root/.nvidia-omniverse/logs:rw 
+            - $HOME/docker/isaac-sim/data:/root/.local/share/ov/data:rw 
+            - $HOME/docker/isaac-sim/pkg:/root/.local/share/ov/pkg:rw 
+            - $HOME/docker/isaac-sim/documents:/root/Documents:rw 
             # X11 Forwarding
             - /tmp/.X11-unix:/tmp/.X11-unix:rw
             - $HOME/.Xauthority:/root/.Xauthority:rw
             # ZSH
             - .zshrc:/root/.zshrc:rw
             - .zsh_history:/root/.zsh_history:rw
+            # BASH
+            - $HOME/$USER/.bash_history:/root/.bash_history:rw
+            # SHARED MEMORY
+            - /dev/shm:/dev/shm:rw
         ulimits:
             nofile:
                 soft: 65536
@@ -64,7 +85,7 @@ services:
                 reservations:
                     devices:
                         - driver: nvidia
-                          device_ids: [ "1" ]
+                          device_ids: [ "all" ]
                           capabilities: [ gpu ]
 
     vln_vscode:
